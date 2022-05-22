@@ -6,7 +6,7 @@ import ITile from "./ITile.png";
 import TTile from "./TTile.png";
 import OTile from "./OTile.png";
 
-export default {
+export {
 LTile,
 JTile,
 ZTile,
