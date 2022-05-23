@@ -11,16 +11,17 @@ const { useState, useEffect, useMemo, useCallback, useRef, forwardRef } = React;
 
 export default PixiComponent('BoardTile', {
     create: props => {
-        var texture = PIXI.Texture.from(ITile);
+        
+        var texture = PIXI.Texture.from(props.texture);
 
         return new PIXI.Sprite(texture);
     },
 
     applyProps: (instance, oldprops, newprops) => {
-        instance.width = 100;
-        instance.height = 100;
-        instance.position = new PIXI.ObservablePoint(null, null, newprops.posX, newprops.posY)
-        console.log("old props:", oldprops)
-        console.log("new props:", newprops)
+        const {boardDimensions, posX, posY, ...newP} = newprops;
+        instance.width = boardDimensions.width/10;
+        instance.height = boardDimensions.height/20;
+        instance.position = new PIXI.ObservablePoint(null, null, newprops.posX*instance.width, newprops.posY*instance.height)
+
     }
 });
