@@ -7,7 +7,7 @@ function Board (props) {
     return( 
         
         <React.Fragment>
-            <BoardTile/>
+            <BoardTile posX={100} posY={500}/>
     
         </React.Fragment> 
     )

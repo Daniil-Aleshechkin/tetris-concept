@@ -9,9 +9,6 @@ import { BaseTexture } from "pixi.js";
 
 const { useState, useEffect, useMemo, useCallback, useRef, forwardRef } = React;
 
-console.log(ITile);
-
-
 export default PixiComponent('BoardTile', {
     create: props => {
         var texture = PIXI.Texture.from(ITile);
@@ -22,7 +19,8 @@ export default PixiComponent('BoardTile', {
     applyProps: (instance, oldprops, newprops) => {
         instance.width = 100;
         instance.height = 100;
-
-        console.log(instance)
+        instance.position = new PIXI.ObservablePoint(null, null, newprops.posX, newprops.posY)
+        console.log("old props:", oldprops)
+        console.log("new props:", newprops)
     }
 });
