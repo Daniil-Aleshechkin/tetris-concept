@@ -1,7 +1,7 @@
 import React from "react"
 import BoardTile from "./BoardTile"
 import {ITile, JTile, LTile, STile, ZTile, OTile, TTile} from "../public/BoardTiles"
-
+const {useState, useEffect} = React
 
 
 
@@ -18,8 +18,8 @@ function Board ({width, height}) {
     var boardTiles= [];
     for (var posX = 0; posX < 10; posX++) {
         for (var posY = 0; posY < 20; posY++) {
-
-            boardTiles.push(<BoardTile posX={posX} posY={posY} boardDimensions= {{width, height}} texture={GetRandom(tiles)}/>)
+            boardTiles.push(<BoardTile 
+                key= {`${posX}, ${posY}`} posX={posX} posY={posY} boardDimensions= {{width, height}} texture={GetRandom(tiles)}/>)
         }
     }
 
