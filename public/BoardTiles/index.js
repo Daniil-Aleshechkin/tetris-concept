@@ -5,13 +5,15 @@ import STile from "./STile.png";
 import ITile from "./ITile.png";
 import TTile from "./TTile.png";
 import OTile from "./OTile.png";
+import DefaultTile from "./DefaultTile.png"
 
 export {
-LTile,
-JTile,
-ZTile,
-STile,
-ITile,
-TTile,
-OTile
+    LTile,
+    JTile,
+    ZTile,
+    STile,
+    ITile,
+    TTile,
+    OTile,
+    DefaultTile
 }
