@@ -1,7 +1,7 @@
 import React from "react"
 import BoardTile from "./BoardTile"
 import {ITile, JTile, LTile, STile, ZTile, OTile, TTile, DefaultTile} from "../public/BoardTiles"
-const {useState, useEffect} = React
+const {useState, useEffect, useRef} = React
 
 
 
@@ -90,20 +90,48 @@ function Board ({width, height}) {
         
         return array[randIndex]
     }
+
+    let currentTexture = 0;
+
+    function SetRandom() {
+        let randomIndex = Math.floor(Math.random()*10*20);
+        let randomTile = GetRandom(tiles);
+
+        let newTexture = currentTexture+1;
+        if (newTexture >=7){
+            newTexture=0
+        }
+
+        if (newTexture == 4) {
+            newTexture = 5
+        }
+
+        tileRefs.forEach(tile => tile.current.handleTextureUpdate(GetRandom(tiles)))
+        currentTexture = newTexture;
+    }
+
+    function SafeUpdate(index, texture) {
+        if (index < 200 && index >=0) {
+            tileRefs[index].current.handleTextureUpdate(texture);
+        }
+    }
     
     var tiles = [ITile, JTile, LTile, STile, ZTile, OTile, TTile]
     var boardTiles= [];
+    var tileRefs = [];
     for (var posX = 0; posX < 10; posX++) {
         for (var posY = 0; posY < 20; posY++) {
-            boardTiles.push(<BoardTile 
-                key= {`${posX}, ${posY}`} posX={posX} posY={posY} boardDimensions= {{width, height}} texture={GetRandom(tiles)}/>)
+            let tileRef = useRef(null);
+            boardTiles.push(<BoardTile
+                key= {`${posX}, ${posY}`} ref={tileRef} posX={posX} posY={posY} boardDimensions= {{width, height}} startTexture={DefaultTile}/>)
+            tileRefs.push(tileRef);
         }
     }
-
+    setInterval(SetRandom, 17);
     return( 
         
         <React.Fragment>
-            {getBoardSprites(STARTING_BOARD_STATE)}
+            {boardTiles}
         </React.Fragment> 
     )
 }
