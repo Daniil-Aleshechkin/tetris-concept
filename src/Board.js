@@ -1,33 +1,10 @@
 import React from "react"
 import BoardTile from "./BoardTile"
 import {ITile, JTile, LTile, STile, ZTile, OTile, TTile, DefaultTile} from "../public/BoardTiles"
-const {useState, useEffect, useRef} = React
 
-
-
-function Board ({width, height}) {
-    const STARTING_BOARD_STATE = [
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""],
-        ["", "", "T", "", "", "", "", "", "", ""]
-    ]
+function Board ({width, height, boardState, onKeyDown, onKeyUp}) {
+    const TILE_HEIGHT = height/20;
+    const TILE_WIDTH = width/10;
 
     function getTextureFromBoardStateTile(boardTile) {
         let tile;
@@ -69,9 +46,7 @@ function Board ({width, height}) {
                 boardSprites.push(
                     <BoardTile
                     key= {`${posX} ${posY}`}
-                    posX={posX}
-                    posY={posY}
-                    boardDimensions={{width, height}}
+                    tileDimensions={{height: TILE_WIDTH, width: TILE_HEIGHT}}
                     texture = {getTextureFromBoardStateTile(boardTile)}
                 />
                 )
@@ -81,58 +56,10 @@ function Board ({width, height}) {
         return boardSprites
     }
 
-    const [board, setBoard] = useState([])
-
-    function GetRandom (array) {
-        var randIndex = Math.floor(
-            Math.random()*array.length
-        )
-        
-        return array[randIndex]
-    }
-
-    let currentTexture = 0;
-
-    function SetRandom() {
-        let randomIndex = Math.floor(Math.random()*10*20);
-        let randomTile = GetRandom(tiles);
-
-        let newTexture = currentTexture+1;
-        if (newTexture >=7){
-            newTexture=0
-        }
-
-        if (newTexture == 4) {
-            newTexture = 5
-        }
-
-        tileRefs.forEach(tile => tile.current.handleTextureUpdate(GetRandom(tiles)))
-        currentTexture = newTexture;
-    }
-
-    function SafeUpdate(index, texture) {
-        if (index < 200 && index >=0) {
-            tileRefs[index].current.handleTextureUpdate(texture);
-        }
-    }
-    
-    var tiles = [ITile, JTile, LTile, STile, ZTile, OTile, TTile]
-    var boardTiles= [];
-    var tileRefs = [];
-    for (var posX = 0; posX < 10; posX++) {
-        for (var posY = 0; posY < 20; posY++) {
-            let tileRef = useRef(null);
-            boardTiles.push(<BoardTile
-                key= {`${posX}, ${posY}`} ref={tileRef} posX={posX} posY={posY} boardDimensions= {{width, height}} startTexture={DefaultTile}/>)
-            tileRefs.push(tileRef);
-        }
-    }
-    setInterval(SetRandom, 17);
     return( 
-        
-        <React.Fragment>
-            {boardTiles}
-        </React.Fragment> 
+        <div tabIndex="0" onKeyDown={onKeyDown} onKeyUp={onKeyUp} id="board" style={{"--width": width/10}}>
+            {getBoardSprites(boardState)}
+        </div>   
     )
 }
 

@@ -1,13 +1,8 @@
 import React from "react";
-
-import Board from "./Board"
-
-import { Stage, Sprite } from '@inlet/react-pixi'
+import Tetris from "./Tetris";
 
 const App = () => (
-  <Stage width={250} height={500}>
-      <Board width={250} height={500}/>
-  </Stage>
+  <Tetris width={200} height={400}/>
 )
 
 export default App
