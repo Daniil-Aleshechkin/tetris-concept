@@ -23,7 +23,6 @@ function useInterval(callback, delay) {
   }
 
 const Tetris = ({width, height}) => {
-    const [presses, setPresses] = useState({})
     const [actions, setActions] = useState({"moveLeft": null, "moveRight": null, "moveDown": null, "dasLeft": null, "dasRight": null})
     const [currentDAS, setCurrentDAS] = useState({time: 0, direction: 0})
 
@@ -57,11 +56,6 @@ const Tetris = ({width, height}) => {
           enableAction("moveDown")
         }
       }
-
-      setPresses(presses => {
-          presses[event.code] = true
-          return {...presses}
-      })
     }
 
     const onKeyUpHandler = event => {
@@ -85,11 +79,6 @@ const Tetris = ({width, height}) => {
       if (event.code == "ArrowDown") {
         disableAction("moveDown")
       }
-
-      setPresses(presses => {
-          presses[event.code] = false
-          return {...presses}
-      })
     }
 
     function enableAction(action) {
@@ -157,21 +146,21 @@ const Tetris = ({width, height}) => {
         applyDAS()
       }
 
-      if (actions["moveLeft"] && presses["ArrowLeft"]) { 
+      if (actions["moveLeft"]) { 
         //move piece code here
 
         console.log("LEFT")
         completeAction("moveLeft")
       }
 
-      if (actions["moveRight"] && presses["ArrowRight"]) {
+      if (actions["moveRight"]) {
         //move piece code here
 
         console.log("RIGHT")
         completeAction("moveRight")
       }
 
-      if (actions["moveDown"] && presses["ArrowDown"]) {
+      if (actions["moveDown"]) {
         //move piece code here
 
         console.log("DOWN")
@@ -182,7 +171,7 @@ const Tetris = ({width, height}) => {
 
     return <React.Fragment>
         <div>{JSON.stringify(currentDAS)} </div>
-        <div>{JSON.stringify(presses)}</div>
+        <div>{JSON.stringify(actions)}</div>
         <Board onKeyUp={onKeyUpHandler} onKeyDown={onKeyDownHandler} width={width} height={height} boardState={board}/>
     </React.Fragment> 
     }
