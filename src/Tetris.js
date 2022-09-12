@@ -23,61 +23,111 @@ function useInterval(callback, delay) {
   }
 
 const Tetris = ({width, height}) => {
-    const [actions, setActions] = useState({"moveLeft": null, "moveRight": null, "moveDown": null, "dasLeft": null, "dasRight": null})
+    const [actions, setActions] = useState({"moveLeft": null, "moveRight": null, "dasLeft": null, "dasRight": null, "softDrop": null, "hardDrop": null, "90Rotate": null, "180Rotate": null, "holdPiece": null})
     const [currentDAS, setCurrentDAS] = useState({time: 0, direction: 0})
-
+    const [controls, setConstrols] = useState({"moveLeft": "ArrowLeft", "moveRight": "ArrowRight", "hardDrop": "Space", "softDrop": "ArrowDown", "90Rotate": "ArrowUp", "180Rotate": "KeyZ", "270Rotate": "KeyX", "holdPiece": "ShiftLeft"})
     const DAS_TIME = 1000;
 
     const onKeyDownHandler = event => {
-      if (event.code == "ArrowLeft") {
-        if (actions["dasLeft"] === null) {
-          setCurrentDAS({time: Date.now(), direction: -1})
-          enableAction("dasLeft")
-        }
-
-        if (actions["moveLeft"] === null) {
-          enableAction("moveLeft")
-        }
-      }
-
-      if (event.code == "ArrowRight") {
-        if (actions["dasRight"] === null) {
-          setCurrentDAS({time: Date.now(), direction: 1})
-          enableAction("dasRight")
-        }
-
-        if (actions["moveRight"] === null) {
-          enableAction("moveRight")
-        }
-      }
-
-      if (event.code == "ArrowDown") {
-        if (actions["moveDown"] === null) {
-          enableAction("moveDown")
-        }
+      switch(event.code) {
+        case controls["moveLeft"]:
+          if (actions["dasLeft"] === null) {
+            setCurrentDAS({time: Date.now(), direction: -1})
+            enableAction("dasLeft")
+          }
+  
+          if (actions["moveLeft"] === null) {
+            enableAction("moveLeft")
+          }
+          break;
+        case controls["moveRight"]:
+          if (actions["dasRight"] === null) {
+            setCurrentDAS({time: Date.now(), direction: 1})
+            enableAction("dasRight")
+          }
+  
+          if (actions["moveRight"] === null) {
+            enableAction("moveRight")
+          }
+          break;
+        case controls["90Rotate"]:
+          if (actions["90Rotate"] === null) {
+            enableAction("90Rotate")
+          }
+          break;
+        case controls["softDrop"]:
+          if (actions["softDrop"] === null) {
+            enableAction("softDrop")
+          }
+          break;
+        case controls["hardDrop"]:
+          if (actions["hardDrop"] === null) {
+            enableAction("hardDrop")
+          }
+          break;
+        case controls["270Rotate"]:
+          if (actions["270Rotate"] === null) {
+            enableAction("270Rotate")
+          }
+          break;
+        case controls["180Rotate"]:
+          if (actions["180Rotate"] === null) {
+            enableAction("180Rotate")
+          }
+          break;
+        case controls["holdPiece"]:
+          if (actions["holdPiece"] === null) {
+            enableAction("holdPiece")
+          }
       }
     }
 
     const onKeyUpHandler = event => {
-      if (event.code == "ArrowLeft") {
-        if (currentDAS.direction == -1) {
-          setCurrentDAS({time: 0, direction: 0});
-        }
-        disableAction("dasLeft")
-        disableAction("moveLeft")
-      }
-
-      if (event.code == "ArrowRight") {
-        if (currentDAS.direction == 1) {
-          setCurrentDAS({time: 0, direction: 0});
-        }
-        
-        disableAction("dasRight")
-        disableAction("moveRight")
-      }
-
-      if (event.code == "ArrowDown") {
-        disableAction("moveDown")
+      switch(event.code) {
+        case controls["moveLeft"]:
+          if (currentDAS.direction == -1) {
+            setCurrentDAS({time: 0, direction: 0});
+          }
+          disableAction("dasLeft")
+          disableAction("moveLeft")
+          break;
+        case controls["moveRight"]:
+          if (currentDAS.direction == 1) {
+            setCurrentDAS({time: 0, direction: 0});
+          }
+          
+          disableAction("dasRight")
+          disableAction("moveRight")
+          break;
+        case controls["90Rotate"]:
+          if (actions["90Rotate"] === null) {
+            disableAction("90Rotate")
+          }
+          break;
+        case controls["softDrop"]:
+          if (actions["softDrop"] === null) {
+            disableAction("softDrop")
+          }
+          break;
+        case controls["hardDrop"]:
+          if (actions["hardDrop"] === null) {
+            disableAction("hardDrop")
+          }
+          break;
+        case controls["270Rotate"]:
+          if (actions["270Rotate"] === null) {
+            disableAction("270Rotate")
+          }
+          break;
+        case controls["180Rotate"]:
+          if (controls["180Rotate"] === null) {
+            disableAction("180Rotate")
+          }
+          break;
+        case controls["holdPiece"]:
+          if (actions["holdPiece"] === null) {
+            disableAction("holdPiece")
+          }
       }
     }
 
@@ -160,11 +210,46 @@ const Tetris = ({width, height}) => {
         completeAction("moveRight")
       }
 
-      if (actions["moveDown"]) {
-        //move piece code here
+      if (actions["softDrop"]) {
+        //soft drop code here
 
-        console.log("DOWN")
-        completeAction("moveDown")
+        console.log("SOFT DROP")
+        completeAction("softDrop")
+      }
+
+      if (actions["hardDrop"]) {
+        //hard drop code here
+
+        console.log("HARD DROP")
+        completeAction("hardDrop")
+      }
+
+      if (actions["holdPiece"]) {
+        //hold piece code here
+
+        console.log("HOLD")
+        completeAction("holdPiece")
+      }
+
+      if (actions["90Rotate"]) {
+        //90 rotate piece code here
+
+        console.log("90 ROTATE")
+        completeAction("90Rotate")
+      }
+
+      if (actions["180Rotate"]) {
+        //180 rotate piece code here
+
+        console.log("180 ROTATE")
+        completeAction("180Rotate")
+      }
+
+      if (actions["270Rotate"]) {
+        //270 rotate piece code here
+
+        console.log("270 ROTATE")
+        completeAction("270Rotate")
       }
       //console.log(presses, currentDAS)
     }, 30)
