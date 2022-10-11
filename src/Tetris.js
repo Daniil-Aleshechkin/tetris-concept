@@ -27,11 +27,22 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   const [actions, setActions] = useState({"moveLeft": null, "moveRight": null, "dasLeft": null, "dasRight": null, "softDrop": null, "hardDrop": null, "90Rotate": null, "180Rotate": null, "holdPiece": null})
   const [currentDAS, setCurrentDAS] = useState({time: 0, direction: 0})
   const [controls, setConstrols] = useState({"moveLeft": "ArrowLeft", "moveRight": "ArrowRight", "hardDrop": "Space", "softDrop": "ArrowDown", "90Rotate": "ArrowUp", "180Rotate": "KeyZ", "270Rotate": "KeyX", "holdPiece": "ShiftLeft"})
-  const [currentPiece, setCurrentPiece] = useState(startingPieceQueue[0])
+  
   const [board, setBoard] = useState(startingBoardState)
   const [queue, setQueue] = useState(startingPieceQueue.slice(1))
+  const [currentPiece, setCurrentPiece] = useState(startingPieceQueue[0])
 
   const DAS_TIME = 1000;
+
+  if (generatePieceQueue && queue.length <= 14 ) {
+    if (currentPiece === undefined) {
+      setCurrentPiece(queue[0])
+      setQueue(queue.slice(1).concat(generateBag()))
+    } else {
+      setQueue(queue.concat(generateBag()))
+    }
+    
+  }
 
   function generateBag() {
     let pieces = ["T", "S", "Z", "L", "J", "I", "O"]
@@ -130,34 +141,22 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
         disableAction("moveRight")
         break;
       case controls["90Rotate"]:
-        if (actions["90Rotate"] === null) {
-          disableAction("90Rotate")
-        }
+        disableAction("90Rotate")
         break;
       case controls["softDrop"]:
-        if (actions["softDrop"] === null) {
-          disableAction("softDrop")
-        }
+        disableAction("softDrop")
         break;
       case controls["hardDrop"]:
-        if (actions["hardDrop"] === null) {
-          disableAction("hardDrop")
-        }
+        disableAction("hardDrop")
         break;
       case controls["270Rotate"]:
-        if (actions["270Rotate"] === null) {
-          disableAction("270Rotate")
-        }
+        disableAction("270Rotate")
         break;
       case controls["180Rotate"]:
-        if (controls["180Rotate"] === null) {
-          disableAction("180Rotate")
-        }
+        disableAction("180Rotate")
         break;
       case controls["holdPiece"]:
-        if (actions["holdPiece"] === null) {
-          disableAction("holdPiece")
-        }
+        disableAction("holdPiece")
     }
   }
 
@@ -259,12 +258,13 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
     }
     //console.log(presses, currentDAS)
   }, 30)
-
+  console.log(currentPiece)
   return <React.Fragment>
       <div>{JSON.stringify(currentDAS)} </div>
       <div>{JSON.stringify(actions)}</div>
       <Board onKeyUp={onKeyUpHandler} onKeyDown={onKeyDownHandler} width={width} height={height} boardState={board}/>
       <PieceQueue queue={queue}/>
+      <div>{JSON.stringify(currentPiece)}</div>
   </React.Fragment> 
 }
 
