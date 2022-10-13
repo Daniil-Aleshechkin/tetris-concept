@@ -2,6 +2,8 @@ import Board from "./Board"
 import React, { useEffect } from "react"
 import { useState, useRef } from "react"
 import PieceQueue from "./PieceQueue";
+import {getTextureFromBoardStateTile} from "../public/BoardTiles"
+import Piece from "./Piece"
 
 function useInterval(callback, delay) {
     const savedCallback = useRef();
@@ -263,6 +265,7 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   return <React.Fragment>
       <div>{JSON.stringify(currentDAS)} </div>
       <div>{JSON.stringify(actions)}</div>
+      <Piece tileDimensions={{height: 20, width: 20}} texture={getTextureFromBoardStateTile("T", 0)} pieceType="T" rotation={0}/>
       <Board onKeyUp={onKeyUpHandler} onKeyDown={onKeyDownHandler} width={width} height={height} boardState={board}/>
       <PieceQueue queue={queue}/>
   </React.Fragment> 

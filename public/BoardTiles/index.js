@@ -7,6 +7,38 @@ import TTile from "./TTile.png";
 import OTile from "./OTile.png";
 import DefaultTile from "./DefaultTile.png"
 
+function getTextureFromBoardStateTile(boardTile) {
+    let tile;
+
+    switch (boardTile) {
+        case "T":
+            tile = TTile
+            break;
+        case "I":
+            tile = ITile
+            break;
+        case "J":
+            tile = JTile
+            break;
+        case "L":
+            tile = LTile
+            break;
+        case "S":
+            tile = STile
+            break;
+        case "Z":
+            tile = ZTile
+            break;
+        case "O":
+            tile = OTile
+            break;
+        default:
+            tile = DefaultTile
+            break;
+    }
+    return tile
+}
+
 export {
     LTile,
     JTile,
@@ -15,5 +47,6 @@ export {
     ITile,
     TTile,
     OTile,
-    DefaultTile
+    DefaultTile,
+    getTextureFromBoardStateTile
 }
