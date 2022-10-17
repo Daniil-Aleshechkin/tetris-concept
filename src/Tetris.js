@@ -30,7 +30,7 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   const [actions, setActions] = useState({"moveLeft": null, "moveRight": null, "dasLeft": null, "dasRight": null, "softDrop": null, "hardDrop": null, "90Rotate": null, "180Rotate": null, "holdPiece": null})
   const [currentDAS, setCurrentDAS] = useState({time: 0, direction: 0})
   const [controls, setControls] = useState({"moveLeft": "ArrowLeft", "moveRight": "ArrowRight", "hardDrop": "Space", "softDrop": "ArrowDown", "90Rotate": "ArrowUp", "180Rotate": "KeyZ", "270Rotate": "KeyX", "holdPiece": "ShiftLeft"})
-  const [currentPiece, setCurrentPiece] = useState({"pieceType": "T", "pieceRotation": 0, "pieceLocation" : [getPieceStartingXLocationFromPieceType(startingPieceQueue[0], 0), 0] })
+  const [currentPiece, setCurrentPiece] = useState({"pieceType": (startingPieceQueue.length == 0) ? null : startingPieceQueue[0], "pieceRotation": 0, "pieceLocation" : [getPieceStartingXLocationFromPieceType(startingPieceQueue[0], 0), 0] })
   const [board, setBoard] = useState(startingBoardState)
   const [queue, setQueue] = useState(startingPieceQueue.slice(1))
 
@@ -43,6 +43,23 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
       default:
         return 3
     }
+  }
+
+  
+  if (generatePieceQueue && queue.length < 14) {
+    console.log(queue)
+    let newQueue = [...queue];
+    
+    newQueue = newQueue.concat(generateBag())
+    newQueue = newQueue.concat(generateBag())
+    console.log("newqueue", newQueue)
+    if (queue.length == 0)
+      setCurrentPiece(piece => {
+        piece.pieceType = newQueue[0]
+        return {...piece}
+      })
+
+    setQueue(newQueue.slice(1))
   }
 
   const DAS_TIME = 1000;
@@ -314,7 +331,8 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   }, 10)
 
   return <React.Fragment>
-      <Piece location={currentPiece.pieceLocation} tileDimensions={{height: 20, width: 20}} texture={getTextureFromBoardStateTile("T")} pieceType="T" rotation={currentPiece.pieceRotation}/>
+      <div>{JSON.stringify(currentPiece)}</div>
+      <Piece location={currentPiece.pieceLocation} tileDimensions={{height: 20, width: 20}} texture={getTextureFromBoardStateTile(currentPiece.pieceType)} pieceType={currentPiece.pieceType} rotation={currentPiece.pieceRotation}/>
       <Board onKeyUp={onKeyUpHandler} onKeyDown={onKeyDownHandler} width={width} height={height} boardState={board}/>
       <PieceQueue queue={queue}/>
   </React.Fragment> 
