@@ -80,6 +80,7 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   function popPiece () {
     let nextPiece = queue[0]
     let newQueue = queue.slice(1)
+    console.log("QUEUE", queue)
 
     if (generatePieceQueue && queue.length <= 14 ) {
       newQueue.concat(generateBag())
@@ -260,6 +261,38 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   function locationOutOfBound(location) {
     return (location[0] < 0 || location[1] < 0 || location[0] >= 10 || location[1] >= 20)
   }
+
+  function placePiece() {
+    let currentYPos = currentPiece.pieceLocation[1];
+    let tileLocations = getTileLocationsFromPieceAndRotations(currentPiece.pieceType, currentPiece.pieceRotation);
+    let placePieceLocation = null;
+
+    while (currentYPos < 20) {
+      if (placePieceLocation != null) {
+        break;
+      }
+      for (let i = 0; i < 4; i++) {
+        if (currentYPos + tileLocations[i][1] >= 20) { 
+          placePieceLocation = [currentPiece.pieceLocation[0], currentYPos - 1]
+          break;
+        } 
+        if (board[currentYPos + tileLocations[i][1]][currentPiece.pieceLocation[0] + tileLocations[i][0]] != "") {
+          placePieceLocation = [currentPiece.pieceLocation[0], currentYPos - 1]
+          break;
+        }
+      }
+
+      currentYPos += 1;
+    }
+    
+    if (pieceMoveIsValid(placePieceLocation))
+      setBoard(board => {
+        for (let i = 0; i < 4; i++) {
+          board[tileLocations[i][1] + placePieceLocation[1]][tileLocations[i][0] + placePieceLocation[0]] = currentPiece.pieceType;
+        }
+        return [...board]
+      })
+  }
   
   useInterval(() => {
     if (Date.now() - currentDAS.time >= DAS_TIME && currentDAS.time !== 0) {
@@ -291,8 +324,11 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
 
     if (actions["hardDrop"]) {
       //hard drop code here
-      setCurrentPiece(popPiece())
+      let newPieceType = popPiece()
 
+      setCurrentPiece({pieceType: newPieceType, pieceLocation: [getPieceStartingXLocationFromPieceType(newPieceType), 0], pieceRotation: 0})
+
+      placePiece()
       console.log("HARD DROP")
       completeAction("hardDrop")
     }
@@ -331,7 +367,6 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   }, 10)
 
   return <React.Fragment>
-      <div>{JSON.stringify(currentPiece)}</div>
       <Piece location={currentPiece.pieceLocation} tileDimensions={{height: 20, width: 20}} texture={getTextureFromBoardStateTile(currentPiece.pieceType)} pieceType={currentPiece.pieceType} rotation={currentPiece.pieceRotation}/>
       <Board onKeyUp={onKeyUpHandler} onKeyDown={onKeyDownHandler} width={width} height={height} boardState={board}/>
       <PieceQueue queue={queue}/>
