@@ -135,7 +135,7 @@ const TPIECE_270DEG = [[1, 0], [0, 1], [1, 1], [1, 2]]
 // O O X
 // X O O
 // X X X
-const ZPIECE_0DEG = [[0, 0], [2, 1], [0, 1], [1, 1]]
+const ZPIECE_0DEG = [[0, 0], [2, 1], [1, 0], [1, 1]]
 
 // X X O
 // X O O
@@ -150,7 +150,7 @@ const ZPIECE_180DEG = [[0, 1], [1, 2], [1, 1], [2, 2]]
 // X O X
 // O O X
 // O X X
-const ZPIECE_270DEG = [[0, 1], [0, 1], [1, 1], [0, 2]]
+const ZPIECE_270DEG = [[0, 1], [1, 0], [1, 1], [0, 2]]
 
 const IPIECE = [IPIECE_0DEG, IPIECE_90DEG, IPIECE_180DEG, IPIECE_270DEG]
 const JPIECE = [JPIECE_0DEG, JPIECE_90DEG, JPIECE_180DEG, JPIECE_270DEG]
