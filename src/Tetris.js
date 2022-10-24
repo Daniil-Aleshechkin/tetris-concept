@@ -29,6 +29,8 @@ function useInterval(callback, delay) {
 
 const Tetris = ({width, height, startingBoardState, startingPieceQueue, generatePieceQueue}) => {
   const [currentDAS, setCurrentDAS] = useState({time: 0, direction: 0})
+  const [controls, setControls] = useState({"moveLeft": "ArrowLeft", "moveRight": "ArrowRight", "hardDrop": "Space", "softDrop": "ArrowDown", "90Rotate": "ArrowUp", "180Rotate": "KeyZ", "270Rotate": "KeyX", "holdPiece": "ShiftLeft"})
+  const [actions, setActions] = useState({"moveLeft": null, "moveRight": null, "dasLeft": null, "dasRight": null, "softDrop": null, "hardDrop": null, "90Rotate": null, "180Rotate": null, "holdPiece": null})
   const [currentPiece, setCurrentPiece] = useState({"pieceType": (startingPieceQueue.length == 0) ? null : startingPieceQueue[0], "pieceRotation": 0, "pieceLocation" : [getPieceStartingXLocationFromPieceType(startingPieceQueue[0], 0), 0] })
   const [board, setBoard] = useState(startingBoardState)
   const [queue, setQueue] = useState(startingPieceQueue.slice(1))
@@ -100,7 +102,6 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   }
 
   const onKeyDownHandler = event => {
-    console.log(event.code, )
     switch(event.code) {
       case controls["moveLeft"]:
         if (actions["dasLeft"] === null) {
@@ -241,14 +242,13 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
       return {...piece}
     })
 
-    console.log(+new Date() - currentTime)
+    //console.log(+new Date() - currentTime)
   }
 
   function movePiece(location) {
     if (!pieceMoveIsValid(location))
       return
     
-    console.log(location)
     setCurrentPiece(piece => {
       piece.pieceLocation = location
       return {...piece}
@@ -257,9 +257,7 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
 
   function pieceMoveIsValid(location) {
     let tileLocations = getTileLocationsFromPieceAndRotations(currentPiece.pieceType, currentPiece.pieceRotation)
-    console.log(tileLocations, location, currentPiece.pieceType, currentPiece.pieceRotation)
     for(let i = 0; i < 4; i++) {
-      console.log(location[1] + tileLocations[i][1])
       if (locationOutOfBound([tileLocations[i][0] + location[0] , tileLocations[i][1] + location[1]]) || board[location[1] + tileLocations[i][1]][location[0] + tileLocations[i][0]] !== "") {
         return false
       }
@@ -313,21 +311,18 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
     if (actions["moveLeft"]) { 
       //move piece code here
       movePiece([currentPiece.pieceLocation[0]-1, currentPiece.pieceLocation[1]])
-      console.log("LEFT")
       completeAction("moveLeft")
     }
 
     if (actions["moveRight"]) {
       //move piece code here
       movePiece([currentPiece.pieceLocation[0]+1, currentPiece.pieceLocation[1]])
-      console.log("RIGHT")
       completeAction("moveRight")
     }
 
     if (actions["softDrop"]) {
       //soft drop code here
 
-      console.log("SOFT DROP")
       completeAction("softDrop")
     }
 
@@ -338,37 +333,31 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
       setCurrentPiece({pieceType: newPieceType, pieceLocation: [getPieceStartingXLocationFromPieceType(newPieceType), 0], pieceRotation: 0})
 
       placePiece()
-      console.log("HARD DROP")
       completeAction("hardDrop")
     }
 
     if (actions["holdPiece"]) {
       //hold piece code here
 
-      console.log("HOLD")
       completeAction("holdPiece")
     }
 
     if (actions["90Rotate"]) {
       //90 rotate piece code here
 
-      console.log("90 ROTATE")
       rotatePiece(1);
       completeAction("90Rotate")
     }
 
     if (actions["180Rotate"]) {
       //180 rotate piece code here
-
-      console.log("180 ROTATE")
       rotatePiece(2);
       completeAction("180Rotate")
     }
 
     if (actions["270Rotate"]) {
       //270 rotate piece code here
-
-      console.log("270 ROTATE")
+      
       rotatePiece(3);
       completeAction("270Rotate");
     }
