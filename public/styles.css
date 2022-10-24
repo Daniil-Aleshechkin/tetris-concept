@@ -21,6 +21,18 @@ body {
               user-select: none; /* Non-prefixed version, currently
                                     supported by Chrome, Edge, Opera and Firefox */
   }
+
 .pieceQueue {
     margin-top: 2px;
+}
+
+.piece {
+    position: relative;
+}
+.piece > * {
+    position: absolute;
+}
+
+body {
+    overflow-x:  hidden;
 }

@@ -2,6 +2,10 @@ import Board from "./Board"
 import React, { useEffect } from "react"
 import { useState, useRef } from "react"
 import PieceQueue from "./PieceQueue";
+import {getTextureFromBoardStateTile} from "../public/BoardTiles"
+import Piece from "./Piece"
+import { getTileLocationsFromPieceAndRotations } from "../public/PieceRotations";
+import KeyListener from "./KeyListener";
 
 function useInterval(callback, delay) {
     const savedCallback = useRef();
@@ -24,13 +28,38 @@ function useInterval(callback, delay) {
   }
 
 const Tetris = ({width, height, startingBoardState, startingPieceQueue, generatePieceQueue}) => {
-  const [actions, setActions] = useState({"moveLeft": null, "moveRight": null, "dasLeft": null, "dasRight": null, "softDrop": null, "hardDrop": null, "90Rotate": null, "180Rotate": null, "holdPiece": null})
   const [currentDAS, setCurrentDAS] = useState({time: 0, direction: 0})
-  const [controls, setConstrols] = useState({"moveLeft": "ArrowLeft", "moveRight": "ArrowRight", "hardDrop": "Space", "softDrop": "ArrowDown", "90Rotate": "ArrowUp", "180Rotate": "KeyZ", "270Rotate": "KeyX", "holdPiece": "ShiftLeft"})
-  
+  const [currentPiece, setCurrentPiece] = useState({"pieceType": (startingPieceQueue.length == 0) ? null : startingPieceQueue[0], "pieceRotation": 0, "pieceLocation" : [getPieceStartingXLocationFromPieceType(startingPieceQueue[0], 0), 0] })
   const [board, setBoard] = useState(startingBoardState)
   const [queue, setQueue] = useState(startingPieceQueue.slice(1))
-  const [currentPiece, setCurrentPiece] = useState(startingPieceQueue[0])
+
+  function getPieceStartingXLocationFromPieceType(pieceType) {
+    switch (pieceType) {
+      case "O":
+        return 4
+      case "I":
+        return 2
+      default:
+        return 3
+    }
+  }
+
+  
+  if (generatePieceQueue && queue.length < 14) {
+    console.log(queue)
+    let newQueue = [...queue];
+    
+    newQueue = newQueue.concat(generateBag())
+    newQueue = newQueue.concat(generateBag())
+    console.log("newqueue", newQueue)
+    if (queue.length == 0)
+      setCurrentPiece(piece => {
+        piece.pieceType = newQueue[0]
+        return {...piece}
+      })
+
+    setQueue(newQueue.slice(1))
+  }
 
   const DAS_TIME = 1000;
 
@@ -60,6 +89,7 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   function popPiece () {
     let nextPiece = queue[0]
     let newQueue = queue.slice(1)
+    console.log("QUEUE", queue)
 
     if (generatePieceQueue && queue.length <= 14 ) {
       newQueue.concat(generateBag())
@@ -70,6 +100,7 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   }
 
   const onKeyDownHandler = event => {
+    console.log(event.code, )
     switch(event.code) {
       case controls["moveLeft"]:
         if (actions["dasLeft"] === null) {
@@ -124,6 +155,7 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   }
 
   const onKeyUpHandler = event => {
+    //console.log("Up", controls["90Rotate"])
     switch(event.code) {
       case controls["moveLeft"]:
         if (currentDAS.direction == -1) {
@@ -157,10 +189,12 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
         break;
       case controls["holdPiece"]:
         disableAction("holdPiece")
+        break
     }
   }
 
   function enableAction(action) {
+    //console.log("ENABLED", action)
     setActions(actions => {
       actions[action] = true
       return {...actions}
@@ -168,13 +202,17 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   }
 
   function completeAction(action) {
-    setActions(actions => {
-      actions[action] = false
-      return {...actions}
-    })
+    //console.log("COMPLETED", action)
+
+    if (actions[action] !== null)
+      setActions(actions => {
+        actions[action] = false
+        return {...actions}
+      })
   }
 
   function disableAction(action) {
+    //console.log("DISABLED", action)
     setActions(actions => {
       actions[action] = null
       return {...actions}
@@ -194,22 +232,94 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
       completeAction("dasRight")
     }
   }
+
+  function rotatePiece(rotation) {
+    var currentTime = +new Date(); 
+    setCurrentPiece(piece => {
+      piece.pieceRotation = (piece.pieceRotation + rotation) %4
+      
+      return {...piece}
+    })
+
+    console.log(+new Date() - currentTime)
+  }
+
+  function movePiece(location) {
+    if (!pieceMoveIsValid(location))
+      return
+    
+    console.log(location)
+    setCurrentPiece(piece => {
+      piece.pieceLocation = location
+      return {...piece}
+    })
+  }
+
+  function pieceMoveIsValid(location) {
+    let tileLocations = getTileLocationsFromPieceAndRotations(currentPiece.pieceType, currentPiece.pieceRotation)
+    console.log(tileLocations, location, currentPiece.pieceType, currentPiece.pieceRotation)
+    for(let i = 0; i < 4; i++) {
+      console.log(location[1] + tileLocations[i][1])
+      if (locationOutOfBound([tileLocations[i][0] + location[0] , tileLocations[i][1] + location[1]]) || board[location[1] + tileLocations[i][1]][location[0] + tileLocations[i][0]] !== "") {
+        return false
+      }
+    }
+    return true
+  }
+
+  function locationOutOfBound(location) {
+    return (location[0] < 0 || location[1] < 0 || location[0] >= 10 || location[1] >= 20)
+  }
+
+  function placePiece() {
+    let currentYPos = currentPiece.pieceLocation[1];
+    let tileLocations = getTileLocationsFromPieceAndRotations(currentPiece.pieceType, currentPiece.pieceRotation);
+    let placePieceLocation = null;
+
+    while (currentYPos < 20) {
+      if (placePieceLocation != null) {
+        break;
+      }
+      for (let i = 0; i < 4; i++) {
+        if (currentYPos + tileLocations[i][1] >= 20) { 
+          placePieceLocation = [currentPiece.pieceLocation[0], currentYPos - 1]
+          break;
+        } 
+        if (board[currentYPos + tileLocations[i][1]][currentPiece.pieceLocation[0] + tileLocations[i][0]] != "") {
+          placePieceLocation = [currentPiece.pieceLocation[0], currentYPos - 1]
+          break;
+        }
+      }
+
+      currentYPos += 1;
+    }
+    
+    if (pieceMoveIsValid(placePieceLocation))
+      setBoard(board => {
+        for (let i = 0; i < 4; i++) {
+          board[tileLocations[i][1] + placePieceLocation[1]][tileLocations[i][0] + placePieceLocation[0]] = currentPiece.pieceType;
+        }
+        return [...board]
+      })
+  }
   
   useInterval(() => {
     if (Date.now() - currentDAS.time >= DAS_TIME && currentDAS.time !== 0) {
       applyDAS()
     }
 
+    //rotatePiece(1)
+
     if (actions["moveLeft"]) { 
       //move piece code here
-
+      movePiece([currentPiece.pieceLocation[0]-1, currentPiece.pieceLocation[1]])
       console.log("LEFT")
       completeAction("moveLeft")
     }
 
     if (actions["moveRight"]) {
       //move piece code here
-
+      movePiece([currentPiece.pieceLocation[0]+1, currentPiece.pieceLocation[1]])
       console.log("RIGHT")
       completeAction("moveRight")
     }
@@ -223,8 +333,11 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
 
     if (actions["hardDrop"]) {
       //hard drop code here
-      setCurrentPiece(popPiece())
+      let newPieceType = popPiece()
 
+      setCurrentPiece({pieceType: newPieceType, pieceLocation: [getPieceStartingXLocationFromPieceType(newPieceType), 0], pieceRotation: 0})
+
+      placePiece()
       console.log("HARD DROP")
       completeAction("hardDrop")
     }
@@ -240,6 +353,7 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
       //90 rotate piece code here
 
       console.log("90 ROTATE")
+      rotatePiece(1);
       completeAction("90Rotate")
     }
 
@@ -247,6 +361,7 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
       //180 rotate piece code here
 
       console.log("180 ROTATE")
+      rotatePiece(2);
       completeAction("180Rotate")
     }
 
@@ -254,18 +369,22 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
       //270 rotate piece code here
 
       console.log("270 ROTATE")
-      completeAction("270Rotate")
+      rotatePiece(3);
+      completeAction("270Rotate");
     }
     //console.log(presses, currentDAS)
-  }, 30)
-  console.log(currentPiece)
+  }, 10)
+
   return <React.Fragment>
-      <div>{JSON.stringify(currentDAS)} </div>
-      <div>{JSON.stringify(actions)}</div>
-      <Board onKeyUp={onKeyUpHandler} onKeyDown={onKeyDownHandler} width={width} height={height} boardState={board}/>
-      <PieceQueue queue={queue}/>
+      <KeyListener>
+        <Piece location={currentPiece.pieceLocation} tileDimensions={{height: 20, width: 20}} texture={getTextureFromBoardStateTile(currentPiece.pieceType)} pieceType={currentPiece.pieceType} rotation={currentPiece.pieceRotation}/>
+        <Board onKeyUp={onKeyUpHandler} onKeyDown={onKeyDownHandler} width={width} height={height} boardState={board}/>
+        <PieceQueue queue={queue}/>
+      </KeyListener>
       <div>{JSON.stringify(currentPiece)}</div>
   </React.Fragment> 
 }
-
+//<div>{JSON.stringify(actions)}</div>
+//<div>{JSON.stringify(currentDAS)} </div>
+//<div>{JSON.stringify(currentPiece)}</div>
 export default Tetris;
