@@ -27,9 +27,7 @@ function useInterval(callback, delay) {
   }
 
 const Tetris = ({width, height, startingBoardState, startingPieceQueue, generatePieceQueue}) => {
-  const [actions, setActions] = useState({"moveLeft": null, "moveRight": null, "dasLeft": null, "dasRight": null, "softDrop": null, "hardDrop": null, "90Rotate": null, "180Rotate": null, "holdPiece": null})
   const [currentDAS, setCurrentDAS] = useState({time: 0, direction: 0})
-  const [controls, setControls] = useState({"moveLeft": "ArrowLeft", "moveRight": "ArrowRight", "hardDrop": "Space", "softDrop": "ArrowDown", "90Rotate": "ArrowUp", "180Rotate": "KeyZ", "270Rotate": "KeyX", "holdPiece": "ShiftLeft"})
   const [currentPiece, setCurrentPiece] = useState({"pieceType": (startingPieceQueue.length == 0) ? null : startingPieceQueue[0], "pieceRotation": 0, "pieceLocation" : [getPieceStartingXLocationFromPieceType(startingPieceQueue[0], 0), 0] })
   const [board, setBoard] = useState(startingBoardState)
   const [queue, setQueue] = useState(startingPieceQueue.slice(1))
