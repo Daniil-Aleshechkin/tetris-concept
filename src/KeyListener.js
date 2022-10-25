@@ -3,8 +3,8 @@ import { useState, useRef } from "react"
 import {getTileLocationsFromPieceAndRotations} from "../public/PieceRotations"
 import { getPieceSizesFromPieceType } from "../public/PieceSizes"
 
-const KeyListener = ({onMovePieceHandler, onHardDropHandler, onSoftDropHandler, onHoldPieceHandler, onRotatePieceHandler, children}) => {
-    const [controls, setControls] = useState({"ArrowLeft": "moveLeft", "ArrowRight": "moveLeft", "Space": "hardDrop", "ArrowDown": "softDrop", "ArrowUp": "90Rotate", "KeyZ": "180Rotate", "KeyX": "270Rotate", "ShiftLeft": "holdPiece"})
+const KeyListener = ({onMovePieceHandler, onHardDropHandler, onSoftDropHandler, onHoldPieceHandler, onRotatePieceHandler, children, dasDelay}) => {
+    const [controls, setControls] = useState({"ArrowLeft": "moveLeft", "ArrowRight": "moveRight", "Space": "hardDrop", "ArrowDown": "softDrop", "ArrowUp": "90Rotate", "KeyZ": "180Rotate", "KeyX": "270Rotate", "ShiftLeft": "holdPiece"})
     const handlers = {
         "moveLeft" : handleMovePieceLeft,
         "moveRight" : handleMovePieceRight,
@@ -15,57 +15,67 @@ const KeyListener = ({onMovePieceHandler, onHardDropHandler, onSoftDropHandler, 
         "softDrop": onSoftDropHandler,
         "hardDrop": onHardDropHandler}
 
+    const [currentDASAction, setCurrentDASAction] = useState({direction: null, timeout: null})
+
     function handleMovePieceLeft() {
-        //onMovePieceHandler([-1,0])
-        console.log("MOVE LEFT")
-        let code = Math.random();
-        setCurrentActions(actions => {
-            actions.filter(action => action.code=="moveLeft").dasCode = code;
-            return [...actions]
-        })
-        setTimeout(() => dasPieceLeft(code), 1000)
-        
+        onMovePieceHandler([-1,0])
+    
+        if (currentDASAction.timeout != null) {
+            setCurrentDASAction(action => {
+                clearTimeout(action.timeout)
+                return {direction: null, timeout: null}
+            })
+        }
+        setCurrentDASAction({direction: "left", timeout: setTimeout(dasPieceLeft, 100)})
     }
 
     function handleMovePieceRight() {
-        //onMovePieceHandler([1,0])
-        console.log("MOVE RIGHT")
-        let code = Math.random();
-        setCurrentActions(actions => {
-            actions.filter(action => action.code=="moveRight").dasCode = code;
-            return [...actions]
-        })
-        setTimeout(() => dasPieceRight(code), 1000)
-    }
-
-    function dasPieceLeft(code) {
-        console.log(currentActions)
-        if (currentActions.filter(action => action.dasCode == code).length == 1) {
-            console.log("DAS LEFT")
-        }
+        onMovePieceHandler([1,0])
         
+        if (currentDASAction.timeout != null) {
+            setCurrentDASAction(action => {
+                clearTimeout(action.timeout)
+                return {direction: null, timeout: null}
+            })
+        }
+        setCurrentDASAction({direction: "right", timeout: setTimeout(dasPieceRight, 100)})
     }
 
-    function dasPieceRight(code) {
-        if (currentActions.filter(action => action.dasCode == code).length == 1) {
-           console.log("DAS RIGHT")
-        }
+    function dasPieceLeft() {
+        onMovePieceHandler([-20, 0])
+    }
+
+    function dasPieceRight() {
+        onMovePieceHandler([20, 0])
     }
 
     function onKeyUpHandler(event) {
         let move = controls[event.code]
 
-        console.log(move, event.code)
-        setCurrentActions(actions => [...actions.filter(action => action.code != move)])
+        if (move == "moveLeft" || currentDASAction.direction == "left") {
+            setCurrentDASAction(action => {
+                clearTimeout(action.timeout)
+                return {direction: null, timeout : null}
+            })
+        } else if (move == "moveRight" || currentActions.direction == "right") {
+            setCurrentDASAction(action => {
+                clearTimeout(action.timeout)
+                return {direction: null, timeout: null}
+            })
+        }
+
+        setCurrentActions(actions => {
+            console.log(actions)
+            return [...actions.filter(action => action != move)]})
     }
 
     function onKeyDownHandler(event) {
         let move = controls[event.code]
-        if (currentActions.filter(action => action.code == move).length == 0) {
+        if (currentActions.filter(action => action == move).length == 0) {
 
             //console.log(move, event.code)
             setCurrentActions(actions => {
-                return [{code: move}, ...actions]
+                return [move, ...actions]
             })
             handlers[move]()
 
