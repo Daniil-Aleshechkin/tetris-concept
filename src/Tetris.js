@@ -11,7 +11,6 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   const [currentPiece, setCurrentPiece] = useState({"pieceType": (startingPieceQueue.length == 0) ? null : startingPieceQueue[0], "pieceRotation": 0, "pieceLocation" : [getPieceStartingXLocationFromPieceType(startingPieceQueue[0], 0), 0] })
   const [board, setBoard] = useState(startingBoardState)
   const [queue, setQueue] = useState(startingPieceQueue.slice(1))
-  console.log(currentDAS)
   function getPieceStartingXLocationFromPieceType(pieceType) {
     switch (pieceType) {
       case "O":
@@ -99,23 +98,13 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
 
   }
 
-  function onMovePieceHandler(moveLocation) {
-    let goalLocation = [moveLocation[0] + currentPiece.pieceLocation[0], moveLocation[1] + currentPiece.pieceLocation[1]]
-
-    if (moveLocation[0] < 0) {
-      movePieceLeft(goalLocation)
-    } else {
-      movePieceRight(goalLocation)
-    }
-  }
-
   const [currentDAS, setCurrentDAS] = useState({direction: null, timeout: null, enabled: false})
-
+  
   let isLeftDas = currentDAS.direction == "left" && currentDAS.enabled
   let isRightDas = currentDAS.direction == "right" && currentDAS.enabled
 
   function onMovePieceRightHandler() {
-    onMovePieceHandler([1,0])
+    movePieceRight(1)
     
     if (currentDAS.timeout != null) {
       setCurrentDAS(action => {
@@ -124,12 +113,13 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
         })
     }
     let now = Date.now()
-
+    console.log("DISABLED DAS")
     setCurrentDAS({direction: "right", timeout: setTimeout(() => dasPieceRight(now), 100), start: new Date(), enabled: false})
   }
 
   function onMovePieceLeftHandler() {
-      onMovePieceHandler([-1,0])
+      movePieceLeft(1)
+      
       if (currentDAS.timeout != null) {
         setCurrentDAS(action => {
               clearTimeout(action.timeout)
@@ -137,30 +127,28 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
           })
       }
       let now = Date.now()
+      console.log("DISABLED DAS")
 
       setCurrentDAS({direction: "left", timeout: setTimeout(() =>  dasPieceLeft(now), 100), enabled: false})
   }
 
   function dasPieceLeft(now) {
-    onDasEnable()
-    onMovePieceHandler([-10, 0])
-    console.log(currentDAS)
+    onDasEnable("left")
+    movePieceLeft(10)
   }
 
   function dasPieceRight(now) {
-    onDasEnable()
-    onMovePieceHandler([10, 0])
-    console.log(currentDAS)
+    onDasEnable("right")
+    movePieceRight(10)
   }
 
-  function onDasEnable() {
+  function onDasEnable(direction) {
     setCurrentDAS(currentDAS =>{
-      return {enabled: true, timeout: null, ...currentDAS}
+      return {enabled: true, timeout: null, direction: direction}
     })
   }
 
   function onDasDisable(direction) {
-    console.log("DISABLE", direction)
     if (direction == "left" && currentDAS.direction == "left")
       setCurrentDAS(dasAction => {
         if (dasAction.timeout)
@@ -173,8 +161,8 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
         return {enabled: false, timeout: null, direction: null}})
   }
 
-  function movePieceLeft (moveLocation) {
-    let newLocation = getPathFindPiece([-1, 0], moveLocation)
+  function movePieceLeft (amount) {
+    let newLocation = getPathFindPiece([-1, 0], [currentPiece.pieceLocation[0] - amount, currentPiece.pieceLocation[1]])
 
     if (newLocation != currentPiece.pieceLocation) {
       setCurrentPiece(piece => {
@@ -184,8 +172,8 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
     }
   }
 
-  function movePieceRight (moveLocation) {
-    let newLocation = getPathFindPiece([1,0], moveLocation)
+  function movePieceRight (amount) {
+    let newLocation = getPathFindPiece([1,0], [currentPiece.pieceLocation[0] + amount, currentPiece.pieceLocation[1]])
 
     if (newLocation != currentPiece.pieceLocation) {
       setCurrentPiece(piece => {
@@ -239,6 +227,8 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
     return (location[0] < 0 || location[1] < 0 || location[0] >= 10 || location[1] >= 20)
   }
 
+  const EMPTY_ROW = ["", "", "", "", "", "", "", "", "", ""]
+
   function onHandlePlacePiece() {
     let placePieceLocation = getPathFindPiece([0, 1], [currentPiece.pieceLocation[0], 20])
     
@@ -250,8 +240,37 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
       for (let i = 0; i < 4; i++) {
         board[tileLocations[i][1] + placePieceLocation[1]][tileLocations[i][0] + placePieceLocation[0]] = currentPiece.pieceType;
       }
-      return [...board]
+
+      let removedYLocations = new Set()
+      for (let i = 0; i < 4; i++) {
+        let yLocationToCheck = tileLocations[i][1] + placePieceLocation[1]
+        console.log(yLocationToCheck, board[yLocationToCheck])
+        if (isRowFull(board[yLocationToCheck])) {
+          removedYLocations.add(yLocationToCheck)
+        }
+      }
+
+      let newBoard = []
+      for (let row = 0; row < 20; row++) {
+        if (removedYLocations.has(row)) {
+          newBoard.unshift(EMPTY_ROW)
+        } else {
+          newBoard.push(board[row])
+          //onsole.log(board[row])
+        }
+      }
+      console.log(removedYLocations)
+
+      return newBoard
     })
+  }
+
+  function isRowFull (row) {
+    for (let tile of row) {
+      if (tile === "")
+        return false
+    }
+    return true
   }
   
   return <React.Fragment>

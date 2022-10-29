@@ -37,20 +37,20 @@ const IPIECE_270DEG = [[1, 0], [1, 1], [1, 2], [1, 3]]
 // X X X
 const JPIECE_0DEG = [[0, 0], [0, 1], [1, 1], [2, 1]]
 
+// X O O
 // X O X
 // X O X
-// O O X
-const JPIECE_90DEG = [[0, 2], [1, 2], [1, 1], [1, 0]]
+const JPIECE_90DEG = [[1, 0], [2, 0], [1, 1], [1, 2]]
 
 // X X X
 // O O O
 // X X O
 const JPIECE_180DEG = [[0, 1], [1, 1], [2, 1], [2, 2]]
 
-// X O O
 // X O X
 // X O X
-const JPIECE_270DEG = [[1, 0], [2, 0], [1, 1], [1, 2]]
+// O O X
+const JPIECE_270DEG = [[0, 2], [1, 2], [1, 1], [1, 0]]
 
 
 // L PIECE
