@@ -3,11 +3,11 @@ import { useState, useRef } from "react"
 import {getTileLocationsFromPieceAndRotations} from "../public/PieceRotations"
 import { getPieceSizesFromPieceType } from "../public/PieceSizes"
 
-const KeyListener = ({onMovePieceHandler, onHardDropHandler, onSoftDropHandler, onHoldPieceHandler, onRotatePieceHandler, children, dasDelay}) => {
+const KeyListener = ({onDasDisable, onMovePieceLeftHandler, onMovePieceRightHandler, onHardDropHandler, onSoftDropHandler, onHoldPieceHandler, onRotatePieceHandler, children, dasDelay}) => {
     const [controls, setControls] = useState({"ArrowLeft": "moveLeft", "ArrowRight": "moveRight", "Space": "hardDrop", "ArrowDown": "softDrop", "ArrowUp": "90Rotate", "KeyZ": "180Rotate", "KeyX": "270Rotate", "ShiftLeft": "holdPiece"})
     const handlers = {
-        "moveLeft" : handleMovePieceLeft,
-        "moveRight" : handleMovePieceRight,
+        "moveLeft" : onMovePieceLeftHandler,
+        "moveRight" : onMovePieceRightHandler,
         "holdPiece": onHoldPieceHandler,
         "90Rotate" : () => onRotatePieceHandler(1),
         "180Rotate": () => onRotatePieceHandler(2),
@@ -15,57 +15,16 @@ const KeyListener = ({onMovePieceHandler, onHardDropHandler, onSoftDropHandler, 
         "softDrop": onSoftDropHandler,
         "hardDrop": onHardDropHandler}
 
-    const [currentDASAction, setCurrentDASAction] = useState({direction: null, timeout: null})
-
-    function handleMovePieceLeft() {
-        onMovePieceHandler([-1,0])
-    
-        if (currentDASAction.timeout != null) {
-            setCurrentDASAction(action => {
-                clearTimeout(action.timeout)
-                return {direction: null, timeout: null}
-            })
-        }
-        setCurrentDASAction({direction: "left", timeout: setTimeout(dasPieceLeft, 100)})
-    }
-
-    function handleMovePieceRight() {
-        onMovePieceHandler([1,0])
-        
-        if (currentDASAction.timeout != null) {
-            setCurrentDASAction(action => {
-                clearTimeout(action.timeout)
-                return {direction: null, timeout: null}
-            })
-        }
-        setCurrentDASAction({direction: "right", timeout: setTimeout(dasPieceRight, 100)})
-    }
-
-    function dasPieceLeft() {
-        onMovePieceHandler([-20, 0])
-    }
-
-    function dasPieceRight() {
-        onMovePieceHandler([20, 0])
-    }
-
     function onKeyUpHandler(event) {
         let move = controls[event.code]
-
-        if (move == "moveLeft" || currentDASAction.direction == "left") {
-            setCurrentDASAction(action => {
-                clearTimeout(action.timeout)
-                return {direction: null, timeout : null}
-            })
-        } else if (move == "moveRight" || currentActions.direction == "right") {
-            setCurrentDASAction(action => {
-                clearTimeout(action.timeout)
-                return {direction: null, timeout: null}
-            })
+        
+        if (move == "moveLeft" ) {
+            onDasDisable("left")
+        } else if (move == "moveRight") {
+            onDasDisable("right")
         }
 
         setCurrentActions(actions => {
-            console.log(actions)
             return [...actions.filter(action => action != move)]})
     }
 
@@ -73,7 +32,6 @@ const KeyListener = ({onMovePieceHandler, onHardDropHandler, onSoftDropHandler, 
         let move = controls[event.code]
         if (currentActions.filter(action => action == move).length == 0) {
 
-            //console.log(move, event.code)
             setCurrentActions(actions => {
                 return [move, ...actions]
             })
