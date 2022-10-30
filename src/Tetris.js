@@ -9,6 +9,9 @@ import KeyListener from "./KeyListener";
 
 const Tetris = ({width, height, startingBoardState, startingPieceQueue, generatePieceQueue}) => {
   const [currentPiece, setCurrentPiece] = useState({"pieceType": (startingPieceQueue.length == 0) ? null : startingPieceQueue[0], "pieceRotation": 0, "pieceLocation" : [getPieceStartingXLocationFromPieceType(startingPieceQueue[0], 0), 0] })
+  const currentPieceRef = useRef(currentPiece) //TODO: This is hacky. Need to find a better solution for state of persistance in DAS timemout 
+  currentPieceRef.current = currentPiece
+
   const [board, setBoard] = useState(startingBoardState)
   const [queue, setQueue] = useState(startingPieceQueue.slice(1))
   function getPieceStartingXLocationFromPieceType(pieceType) {
@@ -184,7 +187,7 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   }
 
   function getPathFindPiece(incrementor, desiredLocation) {
-    let newLocation = currentPiece.pieceLocation;
+    let newLocation = currentPieceRef.current.pieceLocation;
     
     while(isPieceMoveValid([newLocation[0] + incrementor[0], newLocation[1] + incrementor[1]]) && (desiredLocation[0] != newLocation[0] || desiredLocation[1] != newLocation[1])) {
       newLocation = [newLocation[0] + incrementor[0], newLocation[1] + incrementor[1]]
@@ -204,7 +207,7 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   }
 
   function isPieceMoveValid(location) {
-    let tileLocations = getTileLocationsFromPieceAndRotations(currentPiece.pieceType, currentPiece.pieceRotation)
+    let tileLocations = getTileLocationsFromPieceAndRotations(currentPieceRef.current.pieceType, currentPieceRef.current.pieceRotation)
     for(let i = 0; i < 4; i++) {
       if (locationOutOfBound([tileLocations[i][0] + location[0] , tileLocations[i][1] + location[1]]) || board[location[1] + tileLocations[i][1]][location[0] + tileLocations[i][0]] !== "") {
         return false
@@ -265,6 +268,11 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
     })
   }
 
+  function onSoftDropHandler() {
+    let softDropLocation = getPathFindPiece([0, 1], [currentPiece.pieceLocation[0], 20])
+    setCurrentPiece({...currentPiece, pieceLocation: softDropLocation})
+  }
+
   function isRowFull (row) {
     for (let tile of row) {
       if (tile === "")
@@ -274,7 +282,7 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   }
   
   return <React.Fragment>
-      <KeyListener onDasDisable ={onDasDisable} onMovePieceLeftHandler={onMovePieceLeftHandler} onMovePieceRightHandler={onMovePieceRightHandler} onHardDropHandler={onHandlePlacePiece} onRotatePieceHandler={onHandleRotatePiece}>
+      <KeyListener onSoftDropHandler={onSoftDropHandler} onDasDisable ={onDasDisable} onMovePieceLeftHandler={onMovePieceLeftHandler} onMovePieceRightHandler={onMovePieceRightHandler} onHardDropHandler={onHandlePlacePiece} onRotatePieceHandler={onHandleRotatePiece}>
         <Piece location={currentPiece.pieceLocation} tileDimensions={{height: 20, width: 20}} texture={getTextureFromBoardStateTile(currentPiece.pieceType)} pieceType={currentPiece.pieceType} rotation={currentPiece.pieceRotation}/>
         <Board width={width} height={height} boardState={board}/>
         <PieceQueue queue={queue}/>
