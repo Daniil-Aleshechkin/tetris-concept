@@ -7,10 +7,34 @@ import Piece from "./Piece"
 import { getTileLocationsFromPieceAndRotations } from "../public/PieceRotations";
 import KeyListener from "./KeyListener";
 
+const useDebounce = (val, cancel, setCancel) => {
+  const [debounceVal, setDebounceVal] = React.useState(val);
+
+  React.useEffect(() => {
+    console.log(val, !cancel, val.direction != null, !val.enabled)
+    let timer;
+    if (!cancel && val.direction != null && !val.enabled) {
+      timer = setTimeout(() => setDebounceVal(val), 100);
+      console.log('timer', timer);
+      setCancel(false);
+    }
+
+    // This avoids using useRef
+    return () => {
+      if (timer) {
+        console.log('cancel', timer);
+        clearTimeout(timer);
+      }
+    };
+  }, [val, cancel, setCancel]);
+
+  return debounceVal;
+};
+
 const Tetris = ({width, height, startingBoardState, startingPieceQueue, generatePieceQueue}) => {
   const [currentPiece, setCurrentPiece] = useState({"pieceType": (startingPieceQueue.length == 0) ? null : startingPieceQueue[0], "pieceRotation": 0, "pieceLocation" : [getPieceStartingXLocationFromPieceType(startingPieceQueue[0], 0), 0] })
-  const currentPieceRef = useRef(currentPiece) //TODO: This is hacky. Need to find a better solution for state of persistance in DAS timemout 
-  currentPieceRef.current = currentPiece
+
+  const [currentHeldPiece, setCurrentHeldPiece] = useState({pieceType: "", hasHeldPiece: false})
 
   const [board, setBoard] = useState(startingBoardState)
   const [queue, setQueue] = useState(startingPieceQueue.slice(1))
@@ -101,67 +125,45 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
 
   }
 
-  const [currentDAS, setCurrentDAS] = useState({direction: null, timeout: null, enabled: false})
+  const [currentDAS, setCurrentDAS] = useState({direction: null, enabled: false})
+  const [cancelDAS, setCancelDAS] = useState(false);
+
+  const deBouncedDAS = useDebounce(currentDAS, cancelDAS, setCancelDAS)
   
+  useEffect(() => {
+    if (deBouncedDAS.direction == "left") {
+      movePieceLeft(10)
+    } else if (deBouncedDAS.direction == "right") {
+      movePieceRight(10)
+    }
+    setCurrentDAS({direction: deBouncedDAS.direction, enabled: true})
+
+  }, [deBouncedDAS])
+
   let isLeftDas = currentDAS.direction == "left" && currentDAS.enabled
   let isRightDas = currentDAS.direction == "right" && currentDAS.enabled
 
   function onMovePieceRightHandler() {
     movePieceRight(1)
-    
-    if (currentDAS.timeout != null) {
-      setCurrentDAS(action => {
-            clearTimeout(action.timeout)
-            return {direction: null, timeout: null}
-        })
-    }
-    let now = Date.now()
-    console.log("DISABLED DAS")
-    setCurrentDAS({direction: "right", timeout: setTimeout(() => dasPieceRight(now), 100), start: new Date(), enabled: false})
+
+    setCancelDAS(true)
+    setCancelDAS(false)
+    setCurrentDAS({direction: "right", enabled: false})
   }
 
   function onMovePieceLeftHandler() {
-      movePieceLeft(1)
-      
-      if (currentDAS.timeout != null) {
-        setCurrentDAS(action => {
-              clearTimeout(action.timeout)
-              return {direction: null, timeout: null}
-          })
-      }
-      let now = Date.now()
-      console.log("DISABLED DAS")
-
-      setCurrentDAS({direction: "left", timeout: setTimeout(() =>  dasPieceLeft(now), 100), enabled: false})
-  }
-
-  function dasPieceLeft(now) {
-    onDasEnable("left")
-    movePieceLeft(10)
-  }
-
-  function dasPieceRight(now) {
-    onDasEnable("right")
-    movePieceRight(10)
-  }
-
-  function onDasEnable(direction) {
-    setCurrentDAS(currentDAS =>{
-      return {enabled: true, timeout: null, direction: direction}
-    })
+    movePieceLeft(1)
+    
+    setCancelDAS(true)
+    setCancelDAS(false)
+    setCurrentDAS({direction: "left", enabled: false})
   }
 
   function onDasDisable(direction) {
-    if (direction == "left" && currentDAS.direction == "left")
-      setCurrentDAS(dasAction => {
-        if (dasAction.timeout)
-          clearTimeout(dasAction.timeout)
-        return {enabled: false, timeout: null, direction: null}})
-    else if (direction == "right" && currentDAS.direction == "right")
-      setCurrentDAS(dasAction => {
-        if (dasAction.timeout)
-          clearTimeout(dasAction.timeout)
-        return {enabled: false, timeout: null, direction: null}})
+    if ((direction == "left" && currentDAS.direction == "left") || (direction == "right" && currentDAS.direction == "right")) {
+      setCancelDAS(true)
+      setCurrentDAS({direction: null})
+    }
   }
 
   function movePieceLeft (amount) {
@@ -187,7 +189,7 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   }
 
   function getPathFindPiece(incrementor, desiredLocation) {
-    let newLocation = currentPieceRef.current.pieceLocation;
+    let newLocation = currentPiece.pieceLocation;
     
     while(isPieceMoveValid([newLocation[0] + incrementor[0], newLocation[1] + incrementor[1]]) && (desiredLocation[0] != newLocation[0] || desiredLocation[1] != newLocation[1])) {
       newLocation = [newLocation[0] + incrementor[0], newLocation[1] + incrementor[1]]
@@ -207,7 +209,7 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   }
 
   function isPieceMoveValid(location) {
-    let tileLocations = getTileLocationsFromPieceAndRotations(currentPieceRef.current.pieceType, currentPieceRef.current.pieceRotation)
+    let tileLocations = getTileLocationsFromPieceAndRotations(currentPiece.pieceType, currentPiece.pieceRotation)
     for(let i = 0; i < 4; i++) {
       if (locationOutOfBound([tileLocations[i][0] + location[0] , tileLocations[i][1] + location[1]]) || board[location[1] + tileLocations[i][1]][location[0] + tileLocations[i][0]] !== "") {
         return false
@@ -230,6 +232,21 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
     return (location[0] < 0 || location[1] < 0 || location[0] >= 10 || location[1] >= 20)
   }
 
+  function onHoldPiece() {
+    if (currentHeldPiece.hasHeldPiece)
+      return
+
+    if (currentHeldPiece.pieceType == "") {      
+      setCurrentHeldPiece({pieceType: currentPiece.pieceType, hasHeldPiece: true});
+      setCurrentPiece({pieceType: queue[0], pieceLocation: [getPieceStartingXLocationFromPieceType(queue[0]),0], pieceRotation: 0});
+      popPiece();
+    } else {
+      let heldPiece =  currentHeldPiece.pieceType;
+      setCurrentHeldPiece({pieceType: currentPiece.pieceType, hasHeldPiece: true});
+      setCurrentPiece({pieceType: heldPiece, pieceLocation: [getPieceStartingXLocationFromPieceType(heldPiece),0], pieceRotation: 0});
+    }
+  }
+
   const EMPTY_ROW = ["", "", "", "", "", "", "", "", "", ""]
 
   function onHandlePlacePiece() {
@@ -238,6 +255,7 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
     let tileLocations = getTileLocationsFromPieceAndRotations(currentPiece.pieceType, currentPiece.pieceRotation)
     
     setCurrentPiece({pieceType: queue[0], pieceLocation: [getPieceStartingXLocationFromPieceType(queue[0]),0], pieceRotation: 0})
+    setCurrentHeldPiece({...currentHeldPiece, hasHeldPiece: false})
     popPiece()
     setBoard(board => {
       for (let i = 0; i < 4; i++) {
@@ -256,7 +274,7 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
       let newBoard = []
       for (let row = 0; row < 20; row++) {
         if (removedYLocations.has(row)) {
-          newBoard.unshift(EMPTY_ROW)
+          newBoard.unshift([...EMPTY_ROW])
         } else {
           newBoard.push(board[row])
           //onsole.log(board[row])
@@ -282,11 +300,12 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
   }
   
   return <React.Fragment>
-      <KeyListener onSoftDropHandler={onSoftDropHandler} onDasDisable ={onDasDisable} onMovePieceLeftHandler={onMovePieceLeftHandler} onMovePieceRightHandler={onMovePieceRightHandler} onHardDropHandler={onHandlePlacePiece} onRotatePieceHandler={onHandleRotatePiece}>
+      <KeyListener onHoldPieceHandler={onHoldPiece} onSoftDropHandler={onSoftDropHandler} onDasDisable ={onDasDisable} onMovePieceLeftHandler={onMovePieceLeftHandler} onMovePieceRightHandler={onMovePieceRightHandler} onHardDropHandler={onHandlePlacePiece} onRotatePieceHandler={onHandleRotatePiece}>
         <Piece location={currentPiece.pieceLocation} tileDimensions={{height: 20, width: 20}} texture={getTextureFromBoardStateTile(currentPiece.pieceType)} pieceType={currentPiece.pieceType} rotation={currentPiece.pieceRotation}/>
         <Board width={width} height={height} boardState={board}/>
         <PieceQueue queue={queue}/>
       </KeyListener>
+      <div>{JSON.stringify(currentHeldPiece)}</div>
       <div>{JSON.stringify(currentPiece)}</div>
   </React.Fragment> 
 }
