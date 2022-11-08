@@ -68,24 +68,24 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
     let newQueue = [...queue];
     
     newQueue = newQueue.concat(generateBag())
-    newQueue = newQueue.concat(generateBag())
-    if (queue.length == 0)
+    console.log(newQueue)
+    if (queue.length === 0) {
+      let firstPiece = newQueue[0]
+
       setCurrentPiece(piece => {
-        piece.pieceType = newQueue[0]
+        piece.pieceType = firstPiece
+        piece.pieceLocation = getPieceStartingLocationFromPieceType(firstPiece)
+        piece.pieceRotation = 0
         return {...piece}
       })
-
-    setQueue(newQueue.slice(1))
-  }
-
-  if (generatePieceQueue && queue.length <= 14 ) {
-    if (currentPiece === undefined) {
-      setCurrentPiece(queue[0])
-      setQueue(queue.slice(1).concat(generateBag()))
-    } else {
-      setQueue(queue.concat(generateBag()))
+      newQueue = newQueue.slice(1)
     }
+    console.log(newQueue)
     
+    newQueue = newQueue.concat(generateBag())
+    console.log(newQueue)
+
+    setQueue(newQueue)
   }
 
   function generateBag() {
@@ -280,12 +280,12 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
 
     if (currentHeldPiece.pieceType == "") {      
       setCurrentHeldPiece({pieceType: currentPiece.pieceType, hasHeldPiece: true});
-      setCurrentPiece({pieceType: queue[0], pieceLocation: getPieceStartingLocationFromPieceType(queue[0]), pieceRotation: 0});
+      setCurrentPiece({pieceType: queue[0], pieceLocation: getPieceStartingLocationFromPieceType(queue[0], board), pieceRotation: 0});
       popPiece();
     } else {
       let heldPiece =  currentHeldPiece.pieceType;
       setCurrentHeldPiece({pieceType: currentPiece.pieceType, hasHeldPiece: true});
-      setCurrentPiece({pieceType: heldPiece, pieceLocation: getPieceStartingLocationFromPieceType(heldPiece), pieceRotation: 0});
+      setCurrentPiece({pieceType: heldPiece, pieceLocation: getPieceStartingLocationFromPieceType(heldPiece, board), pieceRotation: 0});
     }
   }
 
