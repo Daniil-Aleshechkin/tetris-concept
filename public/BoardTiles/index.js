@@ -6,6 +6,7 @@ import ITile from "./ITile.png";
 import TTile from "./TTile.png";
 import OTile from "./OTile.png";
 import DefaultTile from "./DefaultTile.png"
+import ShadowPiece from "./ShadowPiece.png"
 
 function getTextureFromBoardStateTile(boardTile) {
     let tile;
@@ -48,5 +49,6 @@ export {
     TTile,
     OTile,
     DefaultTile,
+    ShadowPiece,
     getTextureFromBoardStateTile
 }

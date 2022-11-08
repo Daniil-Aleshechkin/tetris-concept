@@ -2,7 +2,7 @@ import Board from "./Board"
 import React, { useEffect } from "react"
 import { useState, useRef } from "react"
 import PieceQueue from "./PieceQueue";
-import {getTextureFromBoardStateTile} from "../public/BoardTiles"
+import {getTextureFromBoardStateTile, ShadowPiece} from "../public/BoardTiles"
 import Piece from "./Piece"
 import { getTileLocationsFromPieceAndRotations } from "../public/PieceRotations";
 import KeyListener from "./KeyListener";
@@ -344,9 +344,12 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
     }
     return true
   }
+
+  let shadowPieceLocation = getPathFindPiece([0, 1], [currentPiece.pieceLocation[0], 20], currentPiece.pieceLocation)
   
   return <React.Fragment>
       <KeyListener onSoftDropDisable={onSoftDropDisable} onHoldPieceHandler={onHoldPiece} onSoftDropHandler={onSoftDropHandler} onDasDisable ={onDasDisable} onMovePieceLeftHandler={onMovePieceLeftHandler} onMovePieceRightHandler={onMovePieceRightHandler} onHardDropHandler={onHandlePlacePiece} onRotatePieceHandler={onHandleRotatePiece}>
+        <Piece location={shadowPieceLocation} tileDimensions={{height: 20, width: 20}} texture={ShadowPiece} pieceType={currentPiece.pieceType} rotation = {currentPiece.pieceRotation}/>
         <Piece location={currentPiece.pieceLocation} tileDimensions={{height: 20, width: 20}} texture={getTextureFromBoardStateTile(currentPiece.pieceType)} pieceType={currentPiece.pieceType} rotation={currentPiece.pieceRotation}/>
         <Board width={width} height={height} boardState={board}/>
         <PieceQueue queue={queue}/>
