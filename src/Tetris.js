@@ -36,6 +36,7 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
 
   const [board, setBoard] = useState(startingBoardState)
   const [queue, setQueue] = useState(startingPieceQueue.slice(1))
+
   function getPieceStartingLocationFromPieceType(pieceType, newBoard) {
     let startingYLocation = 0;
 
@@ -44,9 +45,6 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
     switch (pieceType) {
       case "O":
         startingXLocation = 4
-        break;
-      case "I":
-        startingXLocation = 2
         break;
     }
 
