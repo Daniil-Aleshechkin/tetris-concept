@@ -3,7 +3,7 @@ import { useState, useRef } from "react"
 import {getTileLocationsFromPieceAndRotations} from "../public/PieceRotations"
 import { getPieceSizesFromPieceType } from "../public/PieceSizes"
 
-const KeyListener = ({onDasDisable, onMovePieceLeftHandler, onMovePieceRightHandler, onHardDropHandler, onSoftDropHandler, onHoldPieceHandler, onRotatePieceHandler, children, dasDelay}) => {
+const KeyListener = ({onSoftDropDisable, onDasDisable, onMovePieceLeftHandler, onMovePieceRightHandler, onHardDropHandler, onSoftDropHandler, onHoldPieceHandler, onRotatePieceHandler, children, dasDelay}) => {
     const [controls, setControls] = useState({"ArrowLeft": "moveLeft", "ArrowRight": "moveRight", "Space": "hardDrop", "ArrowDown": "softDrop", "ArrowUp": "90Rotate", "KeyZ": "180Rotate", "KeyX": "270Rotate", "ShiftLeft": "holdPiece"})
     const handlers = {
         "moveLeft" : onMovePieceLeftHandler,
@@ -22,6 +22,8 @@ const KeyListener = ({onDasDisable, onMovePieceLeftHandler, onMovePieceRightHand
             onDasDisable("left")
         } else if (move == "moveRight") {
             onDasDisable("right")
+        } else if (move == "softDrop") {
+            onSoftDropDisable()
         }
 
         setCurrentActions(actions => {
