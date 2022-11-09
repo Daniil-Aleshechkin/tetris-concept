@@ -6,6 +6,7 @@ import {getTextureFromBoardStateTile, ShadowPiece} from "../public/BoardTiles"
 import Piece from "./Piece"
 import { getTileLocationsFromPieceAndRotations } from "../public/PieceRotations";
 import KeyListener from "./KeyListener";
+import {getTableFromPieceAndRotation} from "../public/PieceKickTables"
 
 const useDebounce = (val, cancel, setCancel) => {
   const [debounceVal, setDebounceVal] = React.useState(val);
@@ -126,14 +127,20 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
       newLocation = getPathFindPieceWithRotation([0, 1], [newLocation[0], 20], newRotation)
     }
 
-    console.log(currentDAS, newLocation, newRotation)
-
-    setCurrentPiece(piece => {
-      piece.pieceLocation = newLocation
-      piece.pieceRotation = newRotation
-      return {...piece}
-    })
-
+    let kickTables = getTableFromPieceAndRotation(currentPiece.pieceType, currentPiece.pieceRotation, rotation)
+    console.log(kickTables)
+    for (let i = 0; i < kickTables.length; i++) {
+      let kickLocation = [newLocation[0] + kickTables[i][0], newLocation[1] + kickTables[i][1]]
+      console.log(kickLocation, kickTables[i])
+      if (isPieceMoveValidWithRotation(kickLocation, newRotation)) {    
+        setCurrentPiece(piece => {
+          piece.pieceLocation = kickLocation
+          piece.pieceRotation = newRotation
+          return {...piece}
+        })
+        return;
+      }
+    }
   }
 
   const [isSoftDroping, setIsSoftDroping] = useState(false)

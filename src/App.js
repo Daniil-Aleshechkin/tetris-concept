@@ -17,15 +17,17 @@ const STARTING_BOARD_STATE = [
   ["", "", "", "", "", "", "", "", "", ""],
   ["", "", "", "", "", "", "", "", "", ""],
   ["", "", "", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", "", "", ""]
+  ["", "", "", "", "", "", "", "S", "S", ""],
+  ["", "", "", "", "", "", "", "", "S", ""],
+  ["S", "S", "S", "S", "S", "S", "S", "", "S", "S"],
+  ["S", "S", "S", "S", "S", "S", "", "", "S", "S"],
+  ["S", "S", "S", "S", "S", "S", "S", "", "S", "S"]
 ]
 
+const STARTING_PIECE_QUEUE = ["T", "T"]
+
 const App = () => (
-  <Tetris width={200} height={400} startingBoardState={STARTING_BOARD_STATE} startingPieceQueue={[]} generatePieceQueue={true}/>
+  <Tetris width={200} height={400} startingBoardState={STARTING_BOARD_STATE} startingPieceQueue={STARTING_PIECE_QUEUE} generatePieceQueue={true}/>
 )
 
 export default App
