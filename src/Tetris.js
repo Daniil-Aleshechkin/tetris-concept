@@ -118,13 +118,9 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
     let newRotation = (currentPiece.pieceRotation + rotation) %4;
 
     if (isLeftDas) {
-      newLocation = getPathFindPieceWithRotation([-1, 0], [-4, newLocation[1]], newRotation)
+      newLocation = getPathFindPieceWithRotation([-1, 0], [-4, newLocation[1]], newLocation, newRotation)
     } else if(isRightDas) {
-      newLocation = getPathFindPieceWithRotation([1,0], [14, newLocation[1]], newRotation)
-    }
-
-    if (isSoftDroping) {
-      newLocation = getPathFindPieceWithRotation([0, 1], [newLocation[0], 20], newRotation)
+      newLocation = getPathFindPieceWithRotation([1,0], [14, newLocation[1]], newLocation, newRotation)
     }
 
     let kickTables = getTableFromPieceAndRotation(currentPiece.pieceType, currentPiece.pieceRotation, rotation)
@@ -132,15 +128,26 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
     for (let i = 0; i < kickTables.length; i++) {
       let kickLocation = [newLocation[0] + kickTables[i][0], newLocation[1] + kickTables[i][1]]
       console.log(kickLocation, kickTables[i])
-      if (isPieceMoveValidWithRotation(kickLocation, newRotation)) {    
-        setCurrentPiece(piece => {
-          piece.pieceLocation = kickLocation
-          piece.pieceRotation = newRotation
-          return {...piece}
-        })
-        return;
+      if (isPieceMoveValidWithRotation(kickLocation, newRotation)) {  
+        newLocation = kickLocation  
+        console.log(kickLocation)
+        break;
+      } else if (i == kickTables.length - 1) {
+          return
       }
     }
+
+    if (isSoftDroping) {
+      console.log("KICK LOCATION", newLocation)
+      newLocation = getPathFindPieceWithRotation([0, 1], [newLocation[0], 20], newLocation, newRotation)
+      console.log("KICK LOCATION SOFT DROPPED", newLocation)
+    }
+
+    setCurrentPiece(piece => {
+      piece.pieceLocation = newLocation
+      piece.pieceRotation = newRotation
+      return {...piece}
+    })
   }
 
   const [isSoftDroping, setIsSoftDroping] = useState(false)
@@ -225,8 +232,8 @@ const Tetris = ({width, height, startingBoardState, startingPieceQueue, generate
     return newLocation
   }
 
-  function getPathFindPieceWithRotation(incrementor, desiredLocation, rotation) {
-    let newLocation = currentPiece.pieceLocation;
+  function getPathFindPieceWithRotation(incrementor, desiredLocation, startingLocation, rotation) {
+    let newLocation = startingLocation;
     
     while(isPieceMoveValidWithRotation([newLocation[0] + incrementor[0], newLocation[1] + incrementor[1]], rotation) && (desiredLocation[0] != newLocation[0] || desiredLocation[1] != newLocation[1])) {
       newLocation = [newLocation[0] + incrementor[0], newLocation[1] + incrementor[1]]

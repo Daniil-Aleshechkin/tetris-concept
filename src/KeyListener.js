@@ -4,7 +4,7 @@ import {getTileLocationsFromPieceAndRotations} from "../public/PieceRotations"
 import { getPieceSizesFromPieceType } from "../public/PieceSizes"
 
 const KeyListener = ({onSoftDropDisable, onDasDisable, onMovePieceLeftHandler, onMovePieceRightHandler, onHardDropHandler, onSoftDropHandler, onHoldPieceHandler, onRotatePieceHandler, children, dasDelay}) => {
-    const [controls, setControls] = useState({"ArrowLeft": "moveLeft", "ArrowRight": "moveRight", "Space": "hardDrop", "ArrowDown": "softDrop", "ArrowUp": "90Rotate", "KeyZ": "180Rotate", "KeyX": "270Rotate", "ShiftLeft": "holdPiece"})
+    const [controls, setControls] = useState({"ArrowLeft": "moveLeft", "ArrowRight": "moveRight", "KeyD": "hardDrop", "ArrowDown": "softDrop", "ArrowUp": "90Rotate", "KeyQ": "180Rotate", "KeyW": "270Rotate", "Tab": "holdPiece"})
     const handlers = {
         "moveLeft" : onMovePieceLeftHandler,
         "moveRight" : onMovePieceRightHandler,
@@ -31,6 +31,8 @@ const KeyListener = ({onSoftDropDisable, onDasDisable, onMovePieceLeftHandler, o
     }
 
     function onKeyDownHandler(event) {
+        event.preventDefault()
+        console.log(event.code)
         let move = controls[event.code]
         if (currentActions.filter(action => action == move).length == 0) {
 
